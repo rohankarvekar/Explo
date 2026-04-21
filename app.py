@@ -1,13 +1,27 @@
 import streamlit as st
-import matplotlib
-matplotlib.use('Agg')
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import plotly.io as pio
 import joblib
 import os
+
+pio.templates["clean"] = go.layout.Template(
+    layout=go.Layout(
+        font=dict(color="#222222", family="Arial", size=13),
+        title=dict(font=dict(color="#1F3864", size=16)),
+        paper_bgcolor="white",
+        plot_bgcolor="#f8f9fa",
+        xaxis=dict(color="#222222", tickfont=dict(color="#222222"),
+                   title_font=dict(color="#222222"), gridcolor="#e0e0e0"),
+        yaxis=dict(color="#222222", tickfont=dict(color="#222222"),
+                   title_font=dict(color="#222222"), gridcolor="#e0e0e0"),
+        legend=dict(font=dict(color="#222222"), bgcolor="rgba(255,255,255,0.9)"),
+    )
+)
+pio.templates.default = "clean"
 
 # ─────────────────────────────────────────────
 # PAGE CONFIG
@@ -515,12 +529,11 @@ elif page == "📊 Results Dashboard":
             # Table
             display_cols = ['Gene_name','epitope_sequence','peptide_length',
                            'promiscuous_score','alleles_bound'] + prob_cols
-            st.dataframe(
-                top_cands[display_cols].reset_index(drop=True).style.background_gradient(
-                    subset=['promiscuous_score'], cmap='Greens'
-                ).format({col: '{:.3f}' for col in prob_cols+['promiscuous_score']}),
-                use_container_width=True, height=300
-            )
+            display_df = top_cands[display_cols].reset_index(drop=True)
+            for col in prob_cols + ['promiscuous_score']:
+                display_df[col] = display_df[col].round(3)
+            st.dataframe(display_df, use_container_width=True, height=300)
+            
         else:
             st.warning("No 3+ allele binders found with current filters.")
 
