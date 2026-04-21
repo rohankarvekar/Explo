@@ -1,4 +1,6 @@
 import streamlit as st
+import matplotlib
+matplotlib.use('Agg')
 import pandas as pd
 import numpy as np
 import plotly.express as px
