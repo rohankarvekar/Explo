@@ -140,57 +140,27 @@ def extract_position_features(sequence):
 # ─────────────────────────────────────────────
 # MOCK DATA (replace with real models/data)
 # ─────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# REAL MODELS + DATA
+# ─────────────────────────────────────────────
+@st.cache_resource
+def load_models():
+    models = {}
+    alleles = {
+        'HLA-A*02:01': 'model_HLA-A_02_01.pkl',
+        'HLA-A*24:02': 'model_HLA-A_24_02.pkl',
+        'HLA-B*07:02': 'model_HLA-B_07_02.pkl',
+        'HLA-B*57:01': 'model_HLA-B_57_01.pkl',
+    }
+    for allele, fname in alleles.items():
+        models[allele] = joblib.load(fname)
+    return models
+
 @st.cache_data
 def load_results():
-    """Load or generate mock results dataframe"""
-    np.random.seed(42)
-    genes = ['MLANA','TYR','PMEL','PRAME','BRAF','GPNMB',
-             'MAGEA1','MAGEA3','MAGEA4','DCT','TYRP1','MCAM','MITF','SOX10','CTAG1B']
-    gene_counts = [438,2082,2610,2002,3030,2254,1202,1222,1234,2042,2114,2550,2070,1830,686]
-    rows = []
-    for gene, count in zip(genes, gene_counts):
-        for i in range(count):
-            length = np.random.choice([8,9,10,11])
-            seq = ''.join(np.random.choice(list('ACDEFGHIKLMNPQRSTVWY'), length))
-            prob_a02 = np.random.beta(2,3)
-            prob_a24 = np.random.beta(2,3)
-            prob_b07 = np.random.beta(2,3)
-            prob_b57 = np.random.beta(2,3)
-            prom_score = np.mean([prob_a02, prob_a24, prob_b07, prob_b57])
-            alleles_bound = sum([prob_a02>0.5, prob_a24>0.5, prob_b07>0.5, prob_b57>0.5])
-            rows.append({
-                'Gene_name': gene, 'epitope_sequence': seq,
-                'peptide_length': length,
-                'prob_HLA_A_02_01': prob_a02, 'prob_HLA_A_24_02': prob_a24,
-                'prob_HLA_B_07_02': prob_b07, 'prob_HLA_B_57_01': prob_b57,
-                'promiscuous_score': prom_score, 'alleles_bound': alleles_bound,
-                'binding_prediction': 1 if prom_score > 0.4 else 0
-            })
-    df = pd.DataFrame(rows)
-    # Inject real top candidates
-    real_candidates = [
-        ('MAGEA3','KVAELVHFL',9,0.82,0.71,0.68,0.76,0.668,3),
-        ('MAGEA3','KVAELVHFLL',10,0.81,0.72,0.65,0.77,0.664,3),
-        ('MAGEA3','KVAELVHFLLL',11,0.80,0.71,0.62,0.77,0.656,3),
-        ('CTAG1B','LLMWITQCFLP',11,0.82,0.69,0.27,0.65,0.617,3),
-        ('PMEL','FLRNQPLTFAL',11,0.86,0.68,0.42,0.58,0.617,3),
-        ('TYRP1','KLLSLGCIFFP',11,0.85,0.70,0.28,0.54,0.594,3),
-        ('PRAME','AMVQAWPFTCL',11,0.74,0.69,0.65,0.75,0.566,3),
-        ('TYR','LAVLYCLLWSF',11,0.74,0.67,0.28,0.62,0.562,3),
-        ('MLANA','AAGIGILTV',9,0.987,0.45,0.42,0.38,0.560,1),
-    ]
-    for gene,seq,length,a02,a24,b07,b57,prom,ab in real_candidates:
-        idx = df[df['Gene_name']==gene].index[0]
-        df.at[idx,'epitope_sequence'] = seq
-        df.at[idx,'peptide_length'] = length
-        df.at[idx,'prob_HLA_A_02_01'] = a02
-        df.at[idx,'prob_HLA_A_24_02'] = a24
-        df.at[idx,'prob_HLA_B_07_02'] = b07
-        df.at[idx,'prob_HLA_B_57_01'] = b57
-        df.at[idx,'promiscuous_score'] = prom
-        df.at[idx,'alleles_bound'] = ab
-    return df
+    return pd.read_csv("melanoma_predictions_final.csv")
 
+allele_models = load_models()
 df = load_results()
 
 # ─────────────────────────────────────────────
