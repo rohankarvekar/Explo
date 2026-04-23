@@ -577,27 +577,12 @@ elif page == "🔬 Predict Epitope":
                 invalid = [c for c in sequence if c not in valid_aa]
                 st.error(f"❌ Invalid amino acids: {invalid}")
             else:
-                # Compute features
-                features = extract_position_features(sequence)
-
-                # Mock predictions (replace with real model.predict_proba)
-                np.random.seed(hash(sequence) % 2**32)
-                # Special case for known epitopes
-                known = {
-                    'AAGIGILTV': [0.987, 0.45, 0.42, 0.38],
-                    'KVAELVHFL': [0.82, 0.71, 0.68, 0.76],
-                    'FLRNQPLTFAL': [0.86, 0.68, 0.42, 0.58],
-                    'ALLAGLVSLL': [0.925, 0.51, 0.48, 0.44],
-                    'KVAELVHFLL': [0.81, 0.72, 0.65, 0.77],
-                }
-                if sequence in known:
-                    probs = known[sequence]
-                else:
-                    # Generate plausible probabilities from features
-                    hydro = np.mean([kd_scale.get(aa, 0) for aa in sequence])
-                    base = 0.3 + (hydro / 10) + np.random.normal(0, 0.1)
-                    probs = [max(0,min(1, base + np.random.normal(0,0.15))) for _ in range(4)]
-
+                    features = [extract_position_features(sequence)]
+                    probs = []
+                    for allele in ['HLA-A*02:01','HLA-A*24:02',
+                                  'HLA-B*07:02','HLA-B*57:01']:
+                        prob = allele_models[allele].predict_proba(features)[0][1]
+                        probs.append(float(prob))  
                 alleles = ['HLA-A*02:01','HLA-A*24:02','HLA-B*07:02','HLA-B*57:01']
                 prom_score = np.mean(probs)
                 alleles_bound = sum(p > 0.5 for p in probs)
