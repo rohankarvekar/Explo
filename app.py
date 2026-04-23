@@ -577,12 +577,12 @@ elif page == "🔬 Predict Epitope":
                 invalid = [c for c in sequence if c not in valid_aa]
                 st.error(f"❌ Invalid amino acids: {invalid}")
             else:
-                    features = [extract_position_features(sequence)]
-                    probs = []
-                    for allele in ['HLA-A*02:01','HLA-A*24:02',
-                                  'HLA-B*07:02','HLA-B*57:01']:
-                        prob = allele_models[allele].predict_proba(features)[0][1]
-                        probs.append(float(prob))  
+                features = [extract_position_features(sequence)]
+                probs = []
+                for allele in ['HLA-A*02:01','HLA-A*24:02',
+                              'HLA-B*07:02','HLA-B*57:01']:
+                    prob = allele_models[allele].predict_proba(features)[0][1]
+                    probs.append(float(prob))  
                 alleles = ['HLA-A*02:01','HLA-A*24:02','HLA-B*07:02','HLA-B*57:01']
                 prom_score = np.mean(probs)
                 alleles_bound = sum(p > 0.5 for p in probs)
