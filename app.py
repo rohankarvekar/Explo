@@ -147,7 +147,7 @@ def extract_position_features(sequence):
 def load_models():
     models = {}
     alleles = {
-        'HLA-A*02:01': 'model_HLA-A_02_01.pkl',
+        'HLA-A*02:01': 'model_HLA-A_02_01 (2).pkl',
         'HLA-A*24:02': 'model_HLA-A_24_02.pkl',
         'HLA-B*07:02': 'model_HLA-B_07_02.pkl',
         'HLA-B*57:01': 'model_HLA-B_57_01.pkl',
